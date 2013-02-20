@@ -146,10 +146,12 @@
 						text = resultObjects[i][settings.property];
 						
 					if (settings.highlightMatches === true) {
-						text = text.replace(filterPatt, '<strong>$1</strong>');
+						text = text.replace(filterPatt, '{{*{$1}*}}');
+						text = $('<div/>').text(text).html();
+						text = text.replace(/\{\{\*\{/g, '<strong>').replace(/\}\*\}\}/g, '</strong>');
 					}
 					
-					$(item).append('<a class="ui-corner-all">' + text + '</a>');
+					$(item).append( $('<a>').addClass('ui-corner-all').html(text) );
 					
 					if (typeof resultObjects[i].image === 'string') {
 						$('>a', item).prepend('<img src="' + resultObjects[i].image + '" />');

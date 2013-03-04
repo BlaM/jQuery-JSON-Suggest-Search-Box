@@ -100,7 +100,11 @@
 				wildCardPatt = new RegExp(regexEscape(settings.wildCard || ''),'g'),
 				results = $('<ul />'),
 				currentSelection, pageX, pageY;
-			
+
+			if (typeof settings.onSelect === 'function') {
+				obj.on('select', settings.onSelect);
+			}
+				
 			/**
 			* When an item has been selected then update the input box,
 			* hide the results again and if set, call the onSelect function.
@@ -109,9 +113,7 @@
 				obj.val(item[settings.property]);
 				$(results).html('').hide();
 				
-				if (typeof settings.onSelect === 'function') {
-					settings.onSelect(item);
-				}
+				obj.trigger('select', item);
 			}
 
 			/**

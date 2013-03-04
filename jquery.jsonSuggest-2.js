@@ -9,7 +9,7 @@
  * @name jsonSuggest
  * @type jQuery plugin
  * @author Tom Coote (tomcoote.co.uk)
- * @version 2.0.1
+ * @version 2.1
  * @copyright Copyright 2011 Tom Coote
  * @license released under the BSD (3-clause) licences
  * 
@@ -72,7 +72,9 @@
 				highlightMatches: true,
 				onSelect: undefined,
 				width: undefined,
-        property: 'text'
+				property: 'text',
+				bubbleReturn: false,
+				autoSelectOnBlur: true
 			},
 			getJSONTimeout;
 		settings = $.extend(defaults, settings);  
@@ -104,7 +106,35 @@
 			if (typeof settings.onSelect === 'function') {
 				obj.on('select', settings.onSelect);
 			}
-				
+			
+			if (settings.bubbleReturn == false) {
+				obj.parent().keypress(function(e) {
+					return (e.which !== 13) || !$(e.target).is(obj);
+				});
+			}
+			
+			if (settings.autoSelectOnBlur == true) {
+				obj.on('blur', function() {
+					var text = this.value;
+					
+					if (text && text.length > 0) {
+						var result;
+						if (settings.data && settings.data.length) {
+							result = filter(text, [settings.data], true);
+							if (result.resultObjects.length == 1) selectResultItem(result.resultObjects[0]);
+						}
+						else if (settings.url && typeof settings.url === 'string') {
+							$.getJSON(settings.url, {search: text}, function(data) {
+								if (data) {
+									result = filter(text, data, true);
+									if (result.resultObjects.length == 1) selectResultItem(result.resultObjects[0]);
+								}
+							});
+						}
+					}
+				});
+			}
+			
 			/**
 			* When an item has been selected then update the input box,
 			* hide the results again and if set, call the onSelect function.
@@ -113,9 +143,9 @@
 				obj.val(item[settings.property]);
 				$(results).html('').hide();
 				
-				obj.trigger('select', item);
+				if (item) obj.trigger('select', item);
 			}
-
+			
 			/**
 			* Used to get rid of the hover class on all result item elements in the
 			* current set of results and add it only to the given element. We also
@@ -193,52 +223,56 @@
 				}
 			}
 			
+			function filter(query, searchData, exact) {
+				var resultObjects = [],
+					filterTxt = (!settings.wildCard) ? regexEscape(query) : regexEscape(query, settings.wildCard).replace(wildCardPatt, '.*'),
+					bMatch = true, 
+					filterPatt, i;
+						
+				if (settings.notCharacter && filterTxt.indexOf(settings.notCharacter) === 0) {
+					filterTxt = filterTxt.substr(settings.notCharacter.length,filterTxt.length);
+					if (filterTxt.length > 0) { bMatch = false; }
+				}
+				
+				if (exact === true) {
+					filterTxt = '^' + filterTxt + '$';
+				} else {
+					filterTxt = filterTxt || '.*';
+					filterTxt = settings.wildCard ? '^' + filterTxt : filterTxt;
+				}
+				filterPatt = settings.caseSensitive ? new RegExp(filterTxt) : new RegExp(filterTxt, 'i');
+				
+				// Look for the required match against each single search data item. When the not
+				// character is used we are looking for a false match. 
+				for (i = 0; i < searchData.length; i += 1) {
+					if (filterPatt.test(searchData[i][settings.property]) === bMatch) {
+						resultObjects.push(searchData[i]);
+					}
+				}
+				
+				return {
+					'resultObjects': resultObjects,
+					'filterTxt': filterTxt
+				};
+			}
+			
 			/**
 			* Prepare the search data based on the settings for this plugin,
 			* run a match against each item in the possible results and display any 
 			* results on the page allowing selection by the user.
 			*/
 			function runSuggest(e) {	
-				var search = function(searchData) {
-					if (this.value.length < settings.minCharacters) {
-						clearAndHideResults();
-						return false;
-					}
-					
-					var resultObjects = [],
-						filterTxt = (!settings.wildCard) ? regexEscape(this.value) : regexEscape(this.value, settings.wildCard).replace(wildCardPatt, '.*'),
-						bMatch = true, 
-						filterPatt, i;
-							
-					if (settings.notCharacter && filterTxt.indexOf(settings.notCharacter) === 0) {
-						filterTxt = filterTxt.substr(settings.notCharacter.length,filterTxt.length);
-						if (filterTxt.length > 0) { bMatch = false; }
-					}
-					filterTxt = filterTxt || '.*';
-					filterTxt = settings.wildCard ? '^' + filterTxt : filterTxt;
-					filterPatt = settings.caseSensitive ? new RegExp(filterTxt) : new RegExp(filterTxt, 'i');
-					
-					// Look for the required match against each single search data item. When the not
-					// character is used we are looking for a false match. 
-					for (i = 0; i < searchData.length; i += 1) {
-						if (filterPatt.test(searchData[i][settings.property]) === bMatch) {
-							resultObjects.push(searchData[i]);
-						}
-					}
-					
-					buildResults(resultObjects, filterTxt);
-				};
+				var text = this.value;
+				if (text.length < settings.minCharacters) {
+					clearAndHideResults();
+					return false;
+				}
 				
 				if (settings.data && settings.data.length) {
-					search.apply(this, [settings.data]);
+					var result = filter(text, [settings.data]);
+					buildResults(result.resultObjects, result.filterTxt);
 				}
 				else if (settings.url && typeof settings.url === 'string') {
-					var text = this.value;
-					if (text.length < settings.minCharacters) {
-						clearAndHideResults();
-						return false;
-					}
-                    
 					$(results).html('<li class="ui-menu-item ajaxSearching"><a class="ui-corner-all">Searching...</a></li>').
 						show().css('height', 'auto');
 					
@@ -247,8 +281,7 @@
 						$.getJSON(settings.url, {search: text}, function(data) {
 							if (data) {
 								buildResults(data, text);
-							}
-							else {
+							} else {
 								clearAndHideResults();
 							}
 						});

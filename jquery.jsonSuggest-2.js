@@ -74,7 +74,7 @@
 				width: undefined,
 				property: 'text',
 				bubbleReturn: false,
-				autoSelectOnBlur: true
+				autoMatchOnBlur: false
 			},
 			getJSONTimeout;
 		settings = $.extend(defaults, settings);  
@@ -104,7 +104,7 @@
 				currentSelection, pageX, pageY;
 
 			if (typeof settings.onSelect === 'function') {
-				obj.on('select', settings.onSelect);
+				obj.on('selectItem', settings.onSelect);
 			}
 			
 			if (settings.bubbleReturn == false) {
@@ -113,7 +113,7 @@
 				});
 			}
 			
-			if (settings.autoSelectOnBlur == true) {
+			if (settings.autoMatchOnBlur == true) {
 				obj.on('blur', function() {
 					var text = this.value;
 					
@@ -143,7 +143,7 @@
 				obj.val(item[settings.property]);
 				$(results).html('').hide();
 				
-				if (item) obj.trigger('select', item);
+				obj.trigger('selectItem', item);
 			}
 			
 			/**

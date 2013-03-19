@@ -9,7 +9,7 @@
  * @name jsonSuggest
  * @type jQuery plugin
  * @author Tom Coote (tomcoote.co.uk), Dominik Deobald (dominik.deobald@interdose.com)
- * @version 2.1
+ * @version 2.1.2
  * @copyright Copyright 2011 Tom Coote
  * @license released under the BSD (3-clause) licences
  * 
@@ -122,12 +122,14 @@
 						if (settings.data && settings.data.length) {
 							result = filter(text, settings.data, true);
 							if (result.resultObjects.length == 1) selectResultItem(result.resultObjects[0]);
+							if (result.resultObjects.length == 0) obj.trigger('noMatchingItem');
 						}
 						else if (settings.url && typeof settings.url === 'string') {
 							$.getJSON(settings.url, {search: text}, function(data) {
 								if (data) {
 									result = filter(text, data, true);
 									if (result.resultObjects.length == 1) selectResultItem(result.resultObjects[0]);
+									if (result.resultObjects.length == 0) obj.trigger('noMatchingItem');
 								}
 							});
 						}
@@ -241,7 +243,7 @@
 					filterTxt = settings.wildCard ? '^' + filterTxt : filterTxt;
 				}
 				filterPatt = settings.caseSensitive ? new RegExp(filterTxt) : new RegExp(filterTxt, 'i');
-				
+					
 				// Look for the required match against each single search data item. When the not
 				// character is used we are looking for a false match. 
 				for (i = 0; i < searchData.length; i += 1) {

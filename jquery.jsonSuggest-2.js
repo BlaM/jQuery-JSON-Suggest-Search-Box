@@ -8,7 +8,7 @@
  *
  * @name jsonSuggest
  * @type jQuery plugin
- * @author Tom Coote (tomcoote.co.uk)
+ * @author Tom Coote (tomcoote.co.uk), Dominik Deobald (dominik.deobald@interdose.com)
  * @version 2.1
  * @copyright Copyright 2011 Tom Coote
  * @license released under the BSD (3-clause) licences
@@ -120,7 +120,7 @@
 					if (text && text.length > 0) {
 						var result;
 						if (settings.data && settings.data.length) {
-							result = filter(text, [settings.data], true);
+							result = filter(text, settings.data, true);
 							if (result.resultObjects.length == 1) selectResultItem(result.resultObjects[0]);
 						}
 						else if (settings.url && typeof settings.url === 'string') {
@@ -269,7 +269,7 @@
 				}
 				
 				if (settings.data && settings.data.length) {
-					var result = filter(text, [settings.data]);
+					var result = filter(text, settings.data);
 					buildResults(result.resultObjects, result.filterTxt);
 				}
 				else if (settings.url && typeof settings.url === 'string') {

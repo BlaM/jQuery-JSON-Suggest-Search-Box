@@ -17,7 +17,7 @@
  *			url :				[default ''] A URL that will return a JSON response. Called via $.getJSON, it is passed a 
  * 								 data dictionary containing the user typed search phrase. It must return a JSON string that
  *								 represents the array of results to display.
- *			data :				[default []]An array or JSON string representation of an array of data to search through.
+ *			data :				[default []] An array or JSON string representation of an array of data to search through.
  *								 Example of the array format is as follows:
 									[
 										{
@@ -60,25 +60,9 @@
 (function($) {
 
 	$.fn.jsonSuggest = function(settings) {
-		var defaults = {  
-				url: '',
-				data: [],
-				minCharacters: 1,
-				maxResults: undefined,
-				wildCard: '',
-				caseSensitive: false,
-				notCharacter: '!',
-				maxHeight: 350,
-				highlightMatches: true,
-				onSelect: undefined,
-				width: undefined,
-				property: 'text',
-				bubbleReturn: false,
-				autoMatchOnBlur: false
-			},
-			getJSONTimeout;
-		settings = $.extend(defaults, settings);  
-	
+		var getJSONTimeout;
+		settings = $.extend($.fn.jsonSuggest.defaults, settings);  
+		
 		return this.each(function() {
 			/**
 			* Escape some text so that it can be used inside a regular expression
@@ -390,6 +374,14 @@
 				pageY = e.pageY;
 			});
 			
+			obj.on('jsonSuggest.addData', function(e, item) {
+				settings.data.push(item);
+			});
+			
+			obj.on('jsonSuggest.setData', function(e, items) {
+				settings.data = items;
+			});
+			
 			// Escape the not character if present so that it doesn't act in the regular expression
 			settings.notCharacter = regexEscape(settings.notCharacter || '');
 			
@@ -399,5 +391,23 @@
 			}
 		});
 	};
+	
+	$.fn.jsonSuggest.defaults = {  
+		url: '',
+		data: [],
+		minCharacters: 1,
+		maxResults: undefined,
+		wildCard: '',
+		caseSensitive: false,
+		notCharacter: '!',
+		maxHeight: 350,
+		highlightMatches: true,
+		onSelect: undefined,
+		width: undefined,
+		property: 'text',
+		bubbleReturn: false,
+		autoMatchOnBlur: false
+	};
+			
 
 })(jQuery);

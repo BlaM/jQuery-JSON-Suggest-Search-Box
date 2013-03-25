@@ -128,7 +128,7 @@ $('input#suggestBox3').jsonSuggest({url: 'http://tomcoote.co.uk/static/JSONSugge
 
 <br/>
 
-<script language="JavaScript" src="jquery-1.4.4.min.js"></script>
+<script language="JavaScript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
 <script language="JavaScript" src="jquery.jsonSuggest-2.js"></script>
 <script language="JavaScript" src="testData/testData.js"></script>
 <script>
@@ -144,7 +144,7 @@ jQuery(function() {
 	
 	// will always return all results, expected use is to call a URL that does something with the search text
 	// before returning a sub set of results.
-	$('input#suggestBox3').jsonSuggest({url: 'http://tomcoote.co.uk/static/JSONSuggestBox2/testData/countryCodes.txt', maxResults: 20});
+	$('input#suggestBox3').jsonSuggest({url: 'testData/countryCodes.txt', maxResults: 20});
 });
 
 </script>

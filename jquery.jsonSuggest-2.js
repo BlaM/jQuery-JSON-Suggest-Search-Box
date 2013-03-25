@@ -59,11 +59,12 @@
 
 (function($) {
 
-	$.fn.jsonSuggest = function(settings) {
+	$.fn.jsonSuggest = function(config) {
 		var getJSONTimeout;
-		settings = $.extend($.fn.jsonSuggest.defaults, settings);  
-		
+	
 		return this.each(function() {
+			var settings = $.extend({}, $.fn.jsonSuggest.defaults, config);  
+			
 			/**
 			* Escape some text so that it can be used inside a regular expression
 			* without implying regular expression rules iself. 

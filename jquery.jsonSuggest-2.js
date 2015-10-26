@@ -9,7 +9,7 @@
  * @name jsonSuggest
  * @type jQuery plugin
  * @author Tom Coote (tomcoote.co.uk), Dominik Deobald (dominik.deobald@interdose.com)
- * @version 2.1.2
+ * @version 2.1.3
  * @copyright Copyright 2011 Tom Coote
  * @license released under the BSD (3-clause) licences
  *
@@ -41,9 +41,9 @@
 									]
  *			minCharacters :		[default 1] Number of characters that the input should accept before running a search.
  *			maxResults :		[default undefined] If set then no more results than this number will be found.
- *			wildCard :			[default ''] A character to be used as a match all wildcard when searching. Leaving empty
- *								 will mean results are matched inside strings but if a wildCard is present then results are
- *								 matched from the beginning of strings.
+ *			wildCard :			[default ''] A character to be used as a match all wildcard when searching.
+ *			exact :   			[default true if wildCard set, false if not] Results are matched inside strings if set 
+ *			                    to false, but only from the beginning of strings if set to true
  *			caseSensitive :		[default false] True if the filter search's are to be case sensitive.
  *			notCharacter :		[default !] The character to use at the start of any search text to specify that the results
  *								 should NOT contain the following text.
@@ -64,6 +64,10 @@
 
 		return this.each(function() {
 			var settings = $.extend({}, $.fn.jsonSuggest.defaults, config);
+
+			if (settings.exact === null) {
+				settings.exact = settings.wildCard ? true : false;
+			}
 
 			/**
 			* Escape some text so that it can be used inside a regular expression
@@ -226,7 +230,7 @@
 					filterTxt = '^' + filterTxt + '$';
 				} else {
 					filterTxt = filterTxt || '.*';
-					filterTxt = settings.wildCard ? '^' + filterTxt : filterTxt;
+					filterTxt = settings.exact ? '^' + filterTxt : filterTxt;
 				}
 				filterPatt = settings.caseSensitive ? new RegExp(filterTxt) : new RegExp(filterTxt, 'i');
 
@@ -400,6 +404,7 @@
 		minCharacters: 1,
 		maxResults: undefined,
 		wildCard: '',
+		exact: null,
 		caseSensitive: false,
 		notCharacter: '!',
 		maxHeight: 350,
